@@ -10,13 +10,7 @@ const app = new Hono();
 app.use(
   "/graphql",
   cors({
-    origin: (origin) => {
-      const allowed = [
-        "http://localhost:5173",
-        process.env.FRONTEND_URL ?? "",
-      ];
-      return allowed.includes(origin ?? "") ? origin ?? "" : "";
-    },
+    origin: "*",
     allowMethods: ["POST", "GET", "OPTIONS"],
     allowHeaders: ["Content-Type"],
   })
@@ -31,20 +25,32 @@ app.on(["GET", "POST"], "/graphql", (c) =>
   yoga.fetch(c.req.raw, c.env as any)
 );
 
-// Vercel serverless handler
 module.exports = async (req: IncomingMessage, res: ServerResponse) => {
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.statusCode = 204;
+    res.end();
+    return;
+  }
+
   const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+  const hasBody = req.method !== "GET" && req.method !== "HEAD";
+
   const request = new Request(url.toString(), {
     method: req.method,
     headers: req.headers as HeadersInit,
-    body: req.method !== "GET" && req.method !== "HEAD"
-      ? require("stream").Readable.toWeb(req)
-      : undefined,
-  });
+    ...(hasBody && {
+      body: require("stream").Readable.toWeb(req),
+      duplex: "half",
+    }),
+  } as RequestInit);
 
   const response = await app.fetch(request);
   res.statusCode = response.status;
   response.headers.forEach((value, key) => res.setHeader(key, value));
+  res.setHeader("Access-Control-Allow-Origin", "*");
   const body = await response.text();
   res.end(body);
 };

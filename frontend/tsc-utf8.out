@@ -1,0 +1,4 @@
+﻿src/apolloClient.ts(5,3): error TS2353: Object literal may only specify known properties, and 'uri' does not exist in type 'Options'.
+src/App.tsx(77,29): error TS2339: Property 'createRelease' does not exist on type '{}'.
+src/App.tsx(99,29): error TS2339: Property 'deleteRelease' does not exist on type '{}'.
+src/App.tsx(174,26): error TS2339: Property 'releases' does not exist on type 'unknown'.

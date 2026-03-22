@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "postinstall": "prisma generate",
     "test": "vitest run",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
   },

@@ -32,11 +32,10 @@ app.on(["GET", "POST"], "/graphql", (c) =>
 
 // Local dev only
 if (process.env.NODE_ENV !== "production") {
-  const { serve } = await import("@hono/node-server");
+  const { serve } = require("@hono/node-server");
   const port = 4000;
   serve({ fetch: app.fetch, port });
   console.log(`🚀 Server running on http://localhost:${port}/graphql`);
 }
 
-// Vercel serverless export
 export default app;

@@ -1,4 +1,3 @@
-import { serve } from '@hono/node-server';
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createYoga, createSchema } from "graphql-yoga";
@@ -10,26 +9,34 @@ const app = new Hono();
 app.use(
   "/graphql",
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://your-app.vercel.app", // replace with real Vercel URL
-    ],
+    origin: (origin) => {
+      const allowed = [
+        "http://localhost:5173",
+        process.env.FRONTEND_URL ?? "",
+      ];
+      return allowed.includes(origin ?? "") ? origin ?? "" : "";
+    },
     allowMethods: ["POST", "GET", "OPTIONS"],
     allowHeaders: ["Content-Type"],
   })
 );
 
-const yoga = createYoga({ 
+const yoga = createYoga({
   schema: createSchema({ typeDefs: schema, resolvers }),
-  graphqlEndpoint: '/graphql'
+  graphqlEndpoint: "/graphql",
 });
 
-app.on(["GET", "POST"], "/graphql", (c) => yoga.fetch(c.req.raw, c.env as any));
+app.on(["GET", "POST"], "/graphql", (c) =>
+  yoga.fetch(c.req.raw, c.env as any)
+);
 
-const port = 4000;
-console.log(`🚀 Server is running on http://localhost:${port}/graphql`);
+// Local dev only
+if (process.env.NODE_ENV !== "production") {
+  const { serve } = await import("@hono/node-server");
+  const port = 4000;
+  serve({ fetch: app.fetch, port });
+  console.log(`🚀 Server running on http://localhost:${port}/graphql`);
+}
 
-serve({
-  fetch: app.fetch,
-  port
-});
+// Vercel serverless export
+export default app;

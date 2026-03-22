@@ -10,6 +10,7 @@ const yoga = createYoga({
     allowedHeaders: ["Content-Type"],
     methods: ["POST", "GET", "OPTIONS"],
   },
+  landingPage: false,
 });
 
 // Local dev

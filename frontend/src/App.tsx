@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { gql } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { Eye, Trash2 } from 'lucide-react';
 
 const GET_RELEASES = gql`
@@ -71,8 +72,8 @@ function formatDateForInput(dateStr: string) {
 }
 
 export default function App() {
-  const { data, loading, error } = useQuery(GET_RELEASES);
-  const [createRelease] = useMutation(CREATE_RELEASE, {
+  const { data, loading, error } = useQuery<any>(GET_RELEASES);
+  const [createRelease] = useMutation<any>(CREATE_RELEASE, {
     update(cache, { data: { createRelease } }) {
       cache.modify({
         fields: {
@@ -93,8 +94,8 @@ export default function App() {
     }
   });
   
-  const [updateRelease] = useMutation(UPDATE_RELEASE);
-  const [deleteRelease] = useMutation(DELETE_RELEASE, {
+  const [updateRelease] = useMutation<any>(UPDATE_RELEASE);
+  const [deleteRelease] = useMutation<any>(DELETE_RELEASE, {
     update(cache, { data: { deleteRelease } }) {
       cache.modify({
         fields: {
